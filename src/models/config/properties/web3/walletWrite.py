@@ -1,20 +1,19 @@
 from models.config.baseConfigModel import BaseConfigModel
 from web3 import Web3
 
+from models.config.properties.web3.walletRead import WalletReadConfigModel
 
-class WalletConfigModel(BaseConfigModel):
+
+class WalletWriteConfigModel(WalletReadConfigModel):
     web3_client = None
-    chain_id = None
     private_key = None
     executor_wallet = None
-    network_url = None
     gas = 3000000
 
     def transform(self):
-        self.chain_id = self.raw['chain_id']
+        super().transform()
         self.private_key = self.raw['private_key']
         self.executor_wallet = self.raw['executor_wallet']
-        self.network_url = self.raw['network_url']
         self.gas = self.raw.get('gas', self.gas)
 
         self.web3_client = Web3(Web3.HTTPProvider(self.network_url))
