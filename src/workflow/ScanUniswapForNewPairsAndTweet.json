@@ -1,0 +1,63 @@
+{
+  "listener": {
+    "node": "EVMMonitor",
+    "readWallet": {
+      "chain_id": 0,
+      "network_url": "https://polygon-rpc.com"
+    },
+    "contract": {
+      "address": "0x999fc000f3f5176306c0753bad01d6a37644feef",
+      "event_name": "Swap",
+      "ABI": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount0In",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount1In",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount0Out",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount1Out",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            }
+          ],
+          "name": "Swap",
+          "type": "event"
+        }
+      ]
+    },
+    "next_steps": [
+      {
+        "node": "tweet"
+      }
+    ]
+  }
+}

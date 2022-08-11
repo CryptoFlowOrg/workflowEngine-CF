@@ -9,13 +9,16 @@ import math
 from web3.middleware import geth_poa_middleware
 from time import sleep, time
 
+from workers.workerQueue import WorkerQueue
+
 
 class EVMMonitor(BaseNode):
     wallet = None
     contract = None
 
     def transform(self):
-        _wallet = WalletReadConfigModel(self.step["wallet"])
+        self.next_steps = self.step["next_steps"]
+        _wallet = WalletReadConfigModel(self.step["readWallet"])
         _wallet.transform()
         if _wallet.isValid():
             self.wallet = _wallet
@@ -79,7 +82,14 @@ class EVMMonitor(BaseNode):
             state.end_chunk(end_block + 1)
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
-        print(tx_id, args)
+        queue = WorkerQueue.instance()
+        for step in self.next_steps:
+            step.update({
+                "event_id": tx_id,
+                "event": args
+            })
+            queue.newJob(step)
+            print(tx_id, args)
 
 
 if __name__ == '__main__':
@@ -141,7 +151,7 @@ if __name__ == '__main__':
         "event_name": "Swap"
     }
     monitor = EVMMonitor({
-        "wallet": wallet,
+        "readWallet": wallet,
         "contract": contract
     })
     monitor.transform()

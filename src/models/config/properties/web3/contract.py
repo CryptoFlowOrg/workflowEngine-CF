@@ -9,7 +9,7 @@ class ContractConfigModel(BaseConfigModel):
     event_name = None
 
     def transform(self):
-        self.abi = json.loads(self.raw['abi'])
+        self.abi = self.raw['ABI']
         self.address = Web3.toChecksumAddress(self.raw['address'])
         self.event_name = self.raw['event_name']
 

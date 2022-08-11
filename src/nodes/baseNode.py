@@ -1,6 +1,7 @@
 class BaseNode:
     def __init__(self, step):
         self.step = step
+        self.next_steps = []
 
     def execute(self):
         raise Exception("step has not been configured")
