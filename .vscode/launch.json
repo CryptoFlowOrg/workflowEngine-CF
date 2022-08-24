@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Main.py",
             "type": "python",
             "request": "launch",
             "program": "/home/kyle/Documents/workspace/crypto/CryptoFlow/workflowEngine-CF/src/main.py",

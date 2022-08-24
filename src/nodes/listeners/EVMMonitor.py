@@ -84,7 +84,6 @@ class EVMMonitor(BaseNode):
             scanner.scan(start_block, end_block, progress_callback=None)
             print(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
             state.end_chunk(end_block + 1)
-            break
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
         if self.isValidEvent(args):
