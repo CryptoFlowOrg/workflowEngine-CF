@@ -17,6 +17,7 @@ class Condensor(BaseNode):
         self.events = self.step["events"]
 
     def execute(self):
+        global global_events
         global_events.append({
             "event_id": self.step["event_id"],
             "event": self.step["event"]
