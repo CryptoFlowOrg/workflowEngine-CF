@@ -10,6 +10,10 @@ from web3.middleware import geth_poa_middleware
 from time import sleep, time
 
 from workers.workerQueue import WorkerQueue
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class EVMMonitor(BaseNode):
@@ -66,8 +70,8 @@ class EVMMonitor(BaseNode):
         scanner.delete_potentially_forked_block_data(state.get_last_scanned_block() - chain_reorg_safety_blocks)
 
         while True:
-            start_block = state.get_last_scanned_block()
-            end_block = scanner.get_suggested_scan_end_block()
+            start_block = 49832400# state.get_last_scanned_block()
+            end_block = 49832410#scanner.get_suggested_scan_end_block()
             t0 = time()
             while end_block - start_block < 10:
                 sleep(5)
@@ -80,16 +84,36 @@ class EVMMonitor(BaseNode):
             scanner.scan(start_block, end_block, progress_callback=None)
             print(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
             state.end_chunk(end_block + 1)
+            break
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
-        queue = WorkerQueue.instance()
-        for step in self.next_steps:
-            step.update({
-                "event_id": tx_id,
-                "event": args
-            })
-            queue.newJob(step)
-            print(tx_id, args)
+        if self.isValidEvent(args):
+            queue = WorkerQueue.instance()
+            for step in self.next_steps:
+                step.update({
+                    "event_id": tx_id,
+                    "event": args
+                })
+                queue.newJob(step)
+                logger.info(f"We have just processed event_id: {tx_id} and sent it to step: {step['node']}")
+
+    def isValidEvent(self, args):
+        if len(self.contract.filters) == 0:
+            return True
+        for filter in self.contract.filters:
+            if len(filter) != len(args):
+                logging.exception(f"Filter of shape {len(filter)} does not match shape of args {len(args)}")
+                raise Exception("Filter shape does not match args")
+            validKeys = 0
+            for key in filter.keys():
+                if filter[key] == "any":
+                    validKeys += 1
+                else:
+                    if filter[key] == args[key]:
+                        validKeys += 1
+            if validKeys == len(filter):
+                return True
+        return False
 
 
 if __name__ == '__main__':
