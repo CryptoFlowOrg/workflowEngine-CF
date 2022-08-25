@@ -77,13 +77,16 @@ class EVMMonitor(BaseNode):
                 sleep(5)
                 start_block = state.get_last_scanned_block()
                 end_block = scanner.get_suggested_scan_end_block()
-            print(f"time waiting for new events {time() - t0} s")
-            print(f"Scanning events from blocks {start_block} - {end_block}")
+            logger.debug(f"time waiting for new events {time() - t0} s")
+            logger.debug(f"Scanning events from blocks {start_block} - {end_block}")
             t0 = time()
             # Run the scan
             scanner.scan(start_block, end_block, progress_callback=None)
-            print(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
+            logger.debug(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
             state.end_chunk(end_block + 1)
+            sleep_time = 60
+            logger.debug(f"Sleeping for {sleep_time}s")
+            sleep(sleep_time)
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
         if self.isValidEvent(args):
