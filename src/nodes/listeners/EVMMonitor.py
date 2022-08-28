@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class EVMMonitor(BaseNode):
     wallet = None
     contract = None
+    sleep_duration = None
 
     def transform(self):
         self.next_steps = self.step["next_steps"]
@@ -30,10 +31,12 @@ class EVMMonitor(BaseNode):
         _contract.transform()
         if _contract.isValid():
             self.contract = _contract
+        self.sleep_duration = self.step["sleep_duration"]
 
     def isValid(self) -> bool:
         if self.wallet is None or \
-                self.contract is None:
+                self.contract is None or\
+                self.sleep_duration is None:
             return False
         return True
 
@@ -84,9 +87,8 @@ class EVMMonitor(BaseNode):
             scanner.scan(start_block, end_block, progress_callback=None)
             logger.debug(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
             state.end_chunk(end_block + 1)
-            sleep_time = 60
-            logger.debug(f"Sleeping for {sleep_time}s")
-            sleep(sleep_time)
+            logger.debug(f"Sleeping for {self.sleep_duration}s")
+            sleep(self.sleep_duration)
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
         if self.isValidEvent(args):

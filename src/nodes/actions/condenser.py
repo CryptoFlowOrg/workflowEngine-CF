@@ -9,7 +9,7 @@ global_events = []
 logger = logging.getLogger(__name__)
 
 
-class Condensor(BaseNode):
+class Condenser(BaseNode):
     events = 0
 
     def transform(self):
