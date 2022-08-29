@@ -1,22 +1,30 @@
 from models.config.baseConfigModel import BaseConfigModel
 
 
+def isNumericEnhanced(s: str) -> bool:
+    if s.isnumeric():
+        return True
+    if s[0] == "-" and s[1:].isnumeric():
+        return True
+    return False
+
+
 class Template(BaseConfigModel):
     template = None
     rendered = ""
 
     def transform(self):
         self.template = self.raw
-    
-    def render(self, events) -> str:
+
+    def render(self, event) -> str:
         if self.rendered == "":
             self.rendered = self.template
-        # Get data from events
+        # Get data from event
         while "${" in self.rendered:
             start = self.rendered.index("${")
             end = self.rendered[start:].index("}") + start + 1
             key = self.rendered[start + 2: end - 1]
-            replaced_key = str(self.replaceKey(events, key))
+            replaced_key = str(self.replaceKey(event, key))
             self.rendered = self.rendered[:start] + replaced_key + self.rendered[end:]
         # Math fix data
         while "$[" in self.rendered:
@@ -27,16 +35,16 @@ class Template(BaseConfigModel):
             self.rendered = self.rendered[:start] + replaced_key + self.rendered[end:]
         return self.rendered
 
-    def replaceKey(self, events, key):
+    def replaceKey(self, event, key):
         if "." in key:
             idx = key.index(".")
             k = key[:idx]
             v = key[idx + 1:]
-            if k.isnumeric():
+            if isNumericEnhanced(k):
                 k = int(k)
-            return self.replaceKey(events[k], v)
+            return self.replaceKey(event[k], v)
         else:
-            return events[key]
+            return event[key]
 
     def replaceMathOp(self, key):
         if "/" in key:
@@ -52,8 +60,7 @@ class Template(BaseConfigModel):
             nums = [int(x) for x in key.split("+")]
             return nums[0] + nums[1]
 
-
     def isValid(self) -> bool:
-        if self.template is None :
+        if self.template is None:
             return False
         return True

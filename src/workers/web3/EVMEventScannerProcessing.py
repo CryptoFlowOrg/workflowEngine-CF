@@ -79,13 +79,19 @@ class EVMEventScannerProcessing(EventScannerState):
 
         # event_name = event.event # "Transfer"
         log_index = event.logIndex  # Log index within the block
-        txhash = event.transactionHash.hex()  # Transaction hash
+        txhash = event.transactionHash.hex()
+        blkhash = event.blockHash.hex()  # Transaction hash
         block_number = event.blockNumber
         tx_id = f"{block_number}-{txhash}-{log_index}"
 
         # Convert ERC-20 Transfer event to our internal format
-        args = event["args"]
-        self.callback(tx_id, args)
+        e = dict(event)
+        e["args"] = dict(e["args"])
+        e["args"] = dict(e["args"])
+        e["transactionHash"] = txhash
+        e["blockHash"] = blkhash
+        e["block_when"] = int(block_when.timestamp())
+        self.callback(tx_id, e)
 
         # Return a pointer that allows us to look up this event later if needed
         return tx_id

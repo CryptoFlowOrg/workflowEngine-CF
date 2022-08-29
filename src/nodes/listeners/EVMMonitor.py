@@ -20,9 +20,14 @@ class EVMMonitor(BaseNode):
     wallet = None
     contract = None
     sleep_duration = None
+    start_block = None      # Optional
+    mode = None
+    events = []
 
     def transform(self):
-        self.next_steps = self.step["next_steps"]
+        self.next_steps = self.step.get("next_steps", [])
+        self.start_block = self.step.get("start_block", None)
+        self.mode = self.step["mode"]
         _wallet = WalletReadConfigModel(self.step["readWallet"])
         _wallet.transform()
         if _wallet.isValid():
@@ -35,8 +40,9 @@ class EVMMonitor(BaseNode):
 
     def isValid(self) -> bool:
         if self.wallet is None or \
-                self.contract is None or\
-                self.sleep_duration is None:
+                self.contract is None or \
+                self.sleep_duration is None or \
+                self.mode is None:
             return False
         return True
 
@@ -74,6 +80,9 @@ class EVMMonitor(BaseNode):
 
         while True:
             start_block = state.get_last_scanned_block()
+            if self.start_block is not None:
+                start_block = self.start_block
+                self.start_block = None         # need to clear such that we do not reuse this block in future
             end_block = scanner.get_suggested_scan_end_block()
             t0 = time()
             while end_block - start_block < 10:
@@ -87,21 +96,30 @@ class EVMMonitor(BaseNode):
             scanner.scan(start_block, end_block, progress_callback=None)
             logger.debug(f"Completed scan from {start_block} to {end_block} in {time() - t0}s")
             state.end_chunk(end_block + 1)
+            if self.mode == "ON_COMPLETE":
+                self.emitEvent(self.events)
+                self.events = []
             logger.debug(f"Sleeping for {self.sleep_duration}s")
             sleep(self.sleep_duration)
 
     def processEvent(self, tx_id: str, args: dict[str, str]):
         if self.isValidEvent(args):
-            queue = WorkerQueue.instance()
-            for step in self.next_steps:
-                step.update({
-                    "event_id": tx_id,
-                    "event": args
-                })
-                queue.newJob(step)
-                logger.info(f"We have just processed event_id: {tx_id} and sent it to step: {step['node']}")
+            if self.mode == "ON_COMPLETE":
+                self.events.append(args)
+            if self.mode == "ON_RECEIVE":
+                self.emitEvent(args)
 
-    def isValidEvent(self, args):
+    def emitEvent(self, event):
+        queue = WorkerQueue.instance()
+        for step in self.next_steps:
+            step.update({
+                "event": event
+            })
+            queue.newJob(step)
+            logger.info(f"Event is processed and sent to step: {step['node']}")
+
+    def isValidEvent(self, event):
+        args = event["args"]
         if len(self.contract.filters) == 0:
             return True
         for filter in self.contract.filters:

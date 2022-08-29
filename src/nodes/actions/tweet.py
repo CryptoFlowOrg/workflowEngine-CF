@@ -6,25 +6,30 @@ import tweepy
 
 class Tweet(BaseNode):
     credentials = None
-    condensed_events = []
+    event = None
+    template = None
 
-    
     def transform(self):
-        self.credentials = TwitterConfigModel(self.step["credentials"])
-        self.credentials.transform()
-        self.condensed_events = self.step["condensed_events"]
-        self.template = Template(self.step["template"])
-        self.template.transform()
+        _credentials = TwitterConfigModel(self.step["credentials"])
+        _credentials.transform()
+        if _credentials.isValid():
+            self.credentials = _credentials
+        self.event = self.step["event"]
+        _template = Template(self.step["template"])
+        _template.transform()
+        if _template.isValid():
+            self.template = _template
         print(self.step)
 
     def isValid(self) -> bool:
-        if not self.credentials.isValid() or \
-                not self.template.isValid():
+        if self.credentials is None or \
+                self.template is None or \
+                self.event is None:
             return False
         return True
 
     def execute(self):
-        tweet = self.template.render(self.condensed_events)
+        tweet = self.template.render(self.event)
         # Authenticate to Twitter
         auth = tweepy.OAuthHandler(self.credentials.api_key, self.credentials.api_key_secret)
         auth.set_access_token(self.credentials.access_token, self.credentials.access_token_secret)
