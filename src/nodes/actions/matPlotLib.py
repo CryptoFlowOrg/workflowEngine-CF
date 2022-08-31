@@ -31,6 +31,7 @@ class MatPlotLib(BaseNode):
         plt.ylabel(self.graph_config.ylabel.rendered)
         plt.title(self.graph_config.title.rendered)
         plt.savefig(self.graph_config.destination_file)
+        self.next_step()
 
     def isValid(self):
         if self.graph_config is None or \
@@ -38,11 +39,11 @@ class MatPlotLib(BaseNode):
             return False
         return True
 
-    def next_step(self, processed) -> None:
+    def next_step(self) -> None:
         queue = WorkerQueue.instance()
         for step in self.next_steps:
             step.update({
-                "event": processed
+                "event": self.event
             })
             queue.newJob(step)
-            logger.info(f"We have just computed {self.flavour} and sent it to step: {step['node']}")
+            logger.info(f"We have rendered a graph and moving to step: {step['node']}")

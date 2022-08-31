@@ -2,6 +2,7 @@ from nodes.actions.writeToFile import WriteToFile
 from nodes.actions.compute import Compute
 from nodes.actions.matPlotLib import MatPlotLib
 from nodes.actions.tweet import Tweet
+from nodes.actions.writeToS3 import WriteToS3
 from nodes.listeners.EVMMonitor import EVMMonitor
 import logging
 
@@ -25,6 +26,8 @@ def getNode(config: str):
         node = MatPlotLib(config)
     if config["node"] == "writeToFile":
         node = WriteToFile(config)
+    if config["node"] == "writeToS3":
+        node = WriteToS3(config)
 
     if node is None:
         message = f"Node type does not exist for config\n {config}"
