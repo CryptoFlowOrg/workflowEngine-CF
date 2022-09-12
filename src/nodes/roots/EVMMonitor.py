@@ -79,11 +79,13 @@ class EVMMonitor(BaseNode):
         scanner.delete_potentially_forked_block_data(state.get_last_scanned_block() - chain_reorg_safety_blocks)
 
         while True:
-            start_block = state.get_last_scanned_block()
-            if self.start_block is not None:
-                start_block = self.start_block
-                self.start_block = None         # need to clear such that we do not reuse this block in future
-            end_block = scanner.get_suggested_scan_end_block()
+            # start_block = state.get_last_scanned_block()
+            # if self.start_block is not None:
+            #     start_block = self.start_block
+            #     self.start_block = None         # need to clear such that we do not reuse this block in future
+            # end_block = scanner.get_suggested_scan_end_block()
+            start_block = 50982390
+            end_block = 50982410
             t0 = time()
             while end_block - start_block < 10:
                 sleep(5)

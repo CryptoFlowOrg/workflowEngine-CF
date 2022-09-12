@@ -16,8 +16,9 @@ def main(workflow_name: str):
     # We are just initializing the worker queue here
     WorkerQueue.instance()
 
-    listener = getNode(workflow["listener"])
-    listener.execute()
+    root = getNode(workflow["root"])
+    root.execute()
+
 
 if __name__ == '__main__':
     main("ScanUniswapForNewPairsAndTweet")

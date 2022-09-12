@@ -44,7 +44,10 @@ class Template(BaseConfigModel):
                 k = int(k)
             return self.replaceKey(event[k], v)
         else:
-            return event[key]
+            value = event[key]
+            if value is None:
+                return "" 
+            return value
 
     def replaceMathOp(self, key):
         if "/" in key:

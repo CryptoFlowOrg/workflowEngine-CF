@@ -17,6 +17,7 @@ class Tweet(BaseNode):
         self.event = self.step["event"]
         _template = Template(self.step["template"])
         _template.transform()
+        _template.render(self.event)
         if _template.isValid():
             self.template = _template
         print(self.step)
