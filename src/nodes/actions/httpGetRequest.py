@@ -27,18 +27,21 @@ class HttpGetRequest(BaseNode):
 
     def execute(self):
         response = None
-        r = requests.get(self.url.rendered)
-        if r.status_code == 200:
-            if "application/json" in r.headers['content-type']:
-                response = r.json()
+        try:
+            r = requests.get(self.url.rendered)
+            if r.status_code == 200:
+                if "application/json" in r.headers['content-type']:
+                    response = r.json()
+                else:
+                    response = r.text
+                if "restResponse" not in self.event:
+                    self.event["restResponse"] = []
+                self.event["restResponse"].append(response)
+                self.next_step()
             else:
-                response = r.text
-            if "restResponse" not in self.event:
-                self.event["restResponse"] = []
-            self.event["restResponse"].append(response)
-            self.next_step()
-        else:
-            logger.info(f"Error calling url: {self.url} :: {r.status_code}\n{r.text}")
+                logger.info(f"Error calling url: {self.url} :: {r.status_code}\n{r.text}")
+        except Exception as e:
+            logger.info(f"An Exception occured: {e}")
 
     def isValid(self):
         if self.url is None or \

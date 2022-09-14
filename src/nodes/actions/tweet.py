@@ -1,8 +1,11 @@
+import logging
 from nodes.baseNode import BaseNode
 from models.config.properties.actions.template import Template
 from models.config.properties.actions.twitter_credentials import TwitterConfigModel
 import tweepy
 
+
+logger = logging.getLogger(__name__)
 
 class Tweet(BaseNode):
     credentials = None
@@ -39,4 +42,7 @@ class Tweet(BaseNode):
         api = tweepy.API(auth)
 
         # Create a tweet
-        api.update_status(tweet)
+        try:
+            api.update_status(tweet)
+        except Exception as e:
+            logger.info(f"An Exception occured: {e}")
